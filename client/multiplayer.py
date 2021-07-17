@@ -2,8 +2,9 @@
 from .network import Network
 import json
 from .sprites.Sprite import Vala,Nave
+import threading
 
-class LocalMultiplayer():
+class LocalMultiplayer(threading.Thread):
 
     OP_LOGIN = 'LOGIN'
     OP_ADDPLAYER = 'ADDPLAYER'
@@ -14,18 +15,24 @@ class LocalMultiplayer():
     OP_KILLPLAYER = 'KILLPLAYER'
 
     def __init__(self, game, net):
+        super().__init__()
         from .game import Game
         self.net:Network = net
         self.__game: Game = game
         self.__login = False
         self.__send = False
 
+    def run(self) -> None:
+        self.newConect()
+        while self.__login:
+            self.handleGetObject(self.__game.get_localPlayer().get_Id(), self.net.recv())
+
     def newConect(self):
         data = self.net.connect()
         self.handleGetObject(45,data)
 
     def sendObject(self, obj):
-        return self.net.sendRes(json.dumps(obj))
+        return self.net.send(json.dumps(obj))
 
     def handleGetObject(self, idPlayer, data:str):
         data_json = []
@@ -96,3 +103,4 @@ class LocalMultiplayer():
 
     def quit(self):
         self.net.disconnect()
+        self.__login = False

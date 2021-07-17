@@ -38,7 +38,7 @@ class Player():
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_addres = ('192.168.1.35', 15555)
+server_addres = ('localhost', 15555)
 
 sock.bind(server_addres) #le damos el puerto y la direccion ip
 

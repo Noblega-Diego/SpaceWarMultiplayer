@@ -33,18 +33,15 @@ class Game:
 
     def __run(self):
         clock = pygame.time.Clock()
+        self.__multiplayer.start()
         while self.__flag_run:
             clock.tick(30)
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
                     self.__flag_run = False
                 self.player_fire(event)
-            if not self.__multiplayer.isLogin():
-                self.__multiplayer.newConect()
-            else:
+            if self.__multiplayer.isLogin():
                 self.updatePLayerInput()
-                data = self.__multiplayer.sendObject([])
-                self.__multiplayer.handleGetObject(self.__jugadorLocal.get_Id(), data)
             for i in self.valas:
                 if i.get_duracion() == 0:
                     self.valas.remove(i)
@@ -55,13 +52,10 @@ class Game:
                         self.valas.remove(vala)
                         self.__jugadorLocal.set_vida(self.__jugadorLocal.get_vida() - 1)
                         if(self.__jugadorLocal.get_vida() <= 0):
-                            self.__multiplayer.handleGetObject(self.__jugadorLocal.get_Id(),
-                                                           self.__multiplayer.sendObject([{'OP': {
+                            self.__multiplayer.sendObject([{'OP': {
                                                                'type': 'KILL',
                                                                'by':int(vala.get_nave().get_Id())
-                                                           }}]))
-
-
+                                                           }}])
             self.draw()
             pygame.display.update()
         self.__multiplayer.quit()
@@ -89,23 +83,22 @@ class Game:
         cm_move = self.__contol.handleInput()
         if cm_move:
             cm_move.ejecute(self.__jugadorLocal)
-            self.__multiplayer.handleGetObject(self.__jugadorLocal.get_Id(),self.__multiplayer.sendObject([{'OP': {
+            self.__multiplayer.sendObject([{'OP': {
                 'type': 'MOVE_PLAYER',
                 'pos': self.__jugadorLocal.get_pos(),
                 'gr': self.__jugadorLocal.get_gr()
-            }}]))
+            }}])
 
     def player_fire(self, event):
         if(self.__jugadorLocal.get_vida() >= 0):
             cm_shoot = self.__contol.handleShoot(event)
             if cm_shoot:
                 cm_shoot.ejecute(self.__jugadorLocal, self)
-                self.__multiplayer.handleGetObject(self.__jugadorLocal.get_Id(),
-                                                   self.__multiplayer.sendObject([{'OP': {
+                self.__multiplayer.sendObject([{'OP': {
                                                    'type': 'SHOOT',
                                                    'pos': self.__jugadorLocal.get_pos(),
                                                    'gr': self.__jugadorLocal.get_gr()
-                                                   }}]))
+                                                   }}])
 
 
 
