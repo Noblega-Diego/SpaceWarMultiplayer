@@ -26,6 +26,7 @@ class InputHandle:
         if keys[pygame.K_s]: com.addComand(self.__cm_down)
         if keys[pygame.K_a]: com.addComand(self.__cm_left)
         if keys[pygame.K_d]: com.addComand(self.__cm_right)
+        if keys[pygame.K_SPACE]: com.addComand(command.CommandSpeedUp())
         return com
 
     def handleMouse(self) -> Command:

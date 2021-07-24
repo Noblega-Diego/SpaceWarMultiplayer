@@ -10,6 +10,7 @@ class Player():
         self.__id = None
         self.__color = None
         self.__gr = None
+        self.__vida = 100
 
     def changePos(self, pos:Tuple[int,int]):
         self.__pos = pos
@@ -35,6 +36,11 @@ class Player():
     def get_gr(self):
         return self.__gr
 
+    def set_vida(self, vida):
+        self.__vida = vida
+
+    def get_vida(self):
+        return self.__vida
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -52,12 +58,13 @@ def atenderCliente(conexion, id):
     color = (random.randint(10,240),random.randint(10,240),random.randint(10,240))
     list_sockets[id][1].set_Id(id)
     list_sockets[id][1].set_color(color)
-    list_sockets[id][1].changePos((0,0))
+    list_sockets[id][1].changePos((100,100))
     list_sockets[id][1].set_gr(0)
     mess_login = [{'OP':{
         'type':'LOGIN',
         'id': list_sockets[id][1].get_id(),
         'color':list_sockets[id][1].get_color(),
+        'vida': list_sockets[id][1].get_vida(),
         'pos':list_sockets[id][1].get_pos(),
         'gr':list_sockets[id][1].get_gr()
     }}]
@@ -67,6 +74,7 @@ def atenderCliente(conexion, id):
                 'type': 'ADDPLAYER',
                 'id': id,
                 'color': list_sockets[id][1].get_color(),
+                'vida': list_sockets[id][1].get_vida(),
                 'pos': list_sockets[id][1].get_pos(),
                 'gr': list_sockets[id][1].get_gr()
             }}
@@ -75,6 +83,7 @@ def atenderCliente(conexion, id):
                 'type': 'ADDPLAYER',
                 'id': id_user,
                 'color': user[1].get_color(),
+                'vida': user[1].get_vida(),
                 'pos': user[1].get_pos(),
                 'gr': user[1].get_gr()
             }}
@@ -89,7 +98,7 @@ def atenderCliente(conexion, id):
                 dall = data.split('/end')
                 for j in dall:
                     if j != '':
-                        print('{}>{}'.format(id,j))
+                        #print('{}>{}'.format(id,j))
                         l = json.loads(j)
                         for g in l:
                             json_data.append(g)
@@ -97,17 +106,20 @@ def atenderCliente(conexion, id):
                     if(d['OP']['type'] == 'MOVE_PLAYER'):
                         pos = d['OP']['pos']
                         gr = d['OP']['gr']
+                        vida = d['OP']['vida']
                         list_sockets[id][1].changePos((pos[0],pos[1]))
                         list_sockets[id][1].set_gr(gr)
-                        res = [{'OP':{
+                        list_sockets[id][1].set_vida(vida)
+                        r = [{'OP':{
                             'type': 'UPDATEPLAYER',
                             'id': id,
+                            'vida': list_sockets[id][1].get_vida(),
                             'pos': list_sockets[id][1].get_pos(),
                             'gr': list_sockets[id][1].get_gr()
                         }}]
                         for id_user, user in list_sockets.items():
                             if(id_user != id):
-                                user[0].sendall('{}/end'.format(json.dumps(res)).encode('utf-8'))
+                                user[0].sendall('{}/end'.format(json.dumps(r)).encode('utf-8'))
                     elif (d['OP']['type'] == 'SHOOT'):
                         pos = d['OP']['pos']
                         gr = d['OP']['gr']
@@ -123,6 +135,7 @@ def atenderCliente(conexion, id):
                             if (id_user != id):
                                 user[0].sendall('{}/end'.format(json.dumps(r)).encode('utf-8'))
                     elif (d['OP']['type'] == 'KILL'):
+
                         r = [{'OP': {
                             'type': 'KILLPLAYER',
                             'id': id,
@@ -130,6 +143,8 @@ def atenderCliente(conexion, id):
                         for id_user, user in list_sockets.items():
                             if (id_user != id):
                                 user[0].sendall('{}/end'.format(json.dumps(r)).encode('utf-8'))
+                            else:
+                                user[1].set_vida(0)
             conexion.sendall('{}/end'.format(json.dumps(res)).encode('utf-8'))
     except:
         print('mensaje no enviado')

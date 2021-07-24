@@ -12,9 +12,9 @@ class Network:
         self.addr = (self.host, self.port)
 
     def connect(self):
-        self.client.connect(self.addr)
         res = ''
         try:
+            self.client.connect(self.addr)
             while True:
                 print('esperando')
                 res = self.client.recv(2048).decode('utf-8')

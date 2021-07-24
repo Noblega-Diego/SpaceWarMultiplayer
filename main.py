@@ -1,14 +1,15 @@
-# This is a sample Python script.
 
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from client.game import Game
-
+from client.ui.menu import Menu
+from client.controller.controllerMenu import ControllerMenu
 def main():
     game = Game()
+    menu = Menu()
+    controllerMenu = ControllerMenu(menu,game)
+    game.changeScene(menu)
     game.start()
 
 if (__name__ == "__main__"):
     main()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
